@@ -7,17 +7,21 @@ Libraries used:
 	numpy
 	statistics
 	matplotlib
+ 
 Project Description: 
 With the provided dataset preform an exploratory data analysis and model with OLS Regression to identify what variables could be used to predict the selling price of a house.
+
 What files are needed:
 housing.xlsx
 thinkstats2.py
 thinkplot.py
 first.py
 nsfg.py
-Predictive_Housing_Price_Variables.ipynb
+Predictive_Housing_Price_Variables.ipynb (main file)
+
 How to install and Run the Project:
 Download the files needed, see list above, and ensure they are saved in the same directory. Open Jupyter Notebook and navigate to the directory where the files are stored. Run the notebook, no alterations to code should need to be made.
+
 Summary:
 The goal with this exploratory data search of the housing market was to identify what variables can be used to predict the price a house sells for and find trends over the years. Questions surfaced as the exploratory portion took place such as how the square footage of the lot itself plays a role in pricing, and if so, does it play a more significant role than the square footage of the house? How do the number of bedrooms and type of bathroom effect the price? The overall goal was to explore how sale prices fluctuate depending on variables commonly looked at when pricing a property.
 
