@@ -1,0 +1,291 @@
+---
+title: "ThompsonDSC520SemesterProject"
+author: "Lauren M Thompson"
+date: "2023-11-18"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+#Milestone 1
+## Introduction
+In the beginning of 2019 the United States begun to see the effects of COVID-19.
+As this virus spread across the globe health regulations and precautions where implemented for the safety of society. For many this was the first outbreak they have experienced bringing a new light to health safety. This project will investigate the health status of countries in attempts to identify an individuals likelihood of various health outcomes based on location, age, and gender. This study could be used to apply to statistics to an individual or a country at whole to help identify where more preventative care is needed.    
+
+
+## Research Questions
+1. Given some ones general information such as age, gender, country of residence, etc. what is there life expectancy?
+
+2. What are the leading causes of death and if they were altered by 1%, 3%, and 5% how would that effect the populations health status?
+
+3. Are there common leading causes of death or other health concerns worldwide? 
+
+4. What external variables could effect someones overall health? 
+
+5. What countries are outliers, why are they outliers, and what realistic adjustments would need to be made to aid said country? 
+
+6. How can regression be used to predict health outcomes for men, women, and children? 
+
+7. Given the 12 years of data is it possible to predict the next 1, 3, and 5 years of health by country?
+
+
+## Approach
+First step clean data and create subsets of variables to be used during analysis. Get an overview of the data with a preliminary exploration via plots, correlations, covariance matrix, and histograms. This can be used to estimate an individuals life expectancy, leading causes by country, what variables are causing outliers, and what variables can effect someones overall health. Next step is to create predictive model to predict life expectancy given general information and a predictive model for future years of health status by country. 
+
+
+## Addressing the Problem Through Planned Approach
+
+Most of the research questions should be able to be answered with the data set and skills acquired through this course. There the analysis of plots, histograms, correlation and covariants patterns and relations can be anaylzed. Using regression model predictions of a specific individuals health status can be made. The question I foresee e an challenge ege with is predictive analytics for future years. One can use the plots and graphs to infer what the future years may be based on trend, but a neural network with machine learning may produce more accurate result.
+
+## Data
+The dataset that will be used during this project is from stats.oecd.org houses many datasets regarding human interest. The Organisation for Economic Co-operation and Development (OECD) is an international organization that works to build better policies for better lives. One area of coverage is health. The dataset includes variables such as mortality, life expectancy, causes of mortality, maternal and infant mortality, potential years of life lost, avoidable mortality, morbidity, perceived health status, perceived health status by age and gender, perceived health status by socio-economic status, infant health, communicable diseases, cancer, injuries, and absence from work due to illness each broken down by country and year starting in 2010 and ending in 2022. This dataset was last updated on July 3, 2023. This dataset is sourced by: 
+
+
+http://www.oecd.org/health/health-data.htm
+
+After opening the link above you can view the database by selecting database. Select health status on the left hand side, followed by selecting health status - key indicators. On the right hand side there is an information window with a link to a pdf of the definitions, sources, and methods per country used. 
+
+A draw back of using this dataset is it is only as accurate as those who are tracked by OECD which tend to be those interested in economic progression and world trade.
+
+## Required Packages
+ggplot2
+dplyr
+purr
+Metrics
+
+
+## Plots and Tables Needed
+The variables of interest at this time are country, causes of mortality, age, gender, life expectancy, communicable diseases, cancer, and injuries. Other columns do provide interest and more insight and may be used to further aid in investigation. 
+
+Visual overview of the dataset variables through histograms and scatter plots to see overall pattern and draw simple comparisons, identify indicators of outliers, and the correlation between variables. Predictive models such as Simple of Multiple Regress models which will be tested for accuracy using RMSE. 
+
+## Questions for Future Steps
+
+The amount of data within this database is large, how might I need to scale it back to produce meaningful results?
+
+Are there models or concepts that might aid in analyzing this data set in the upcoming weeks?
+
+What variables could be helpful in this investigation that are not currently provided in the dataset?
+
+# Milestone 2
+
+## How to import and clean my data
+
+http://www.oecd.org/health/health-data.htm
+
+After opening the link above you can view the database by selecting database. Select health status on the left hand side, followed by selecting health status - key indicators. After the data set loads you can export the data be selecting the export drop down menu. Select export as CSV. Once exported teh user can save the data set on their device and import it to rstudio as a csv.
+ 
+
+```{r}
+
+df <- read.csv("/Users/laurenthompson/Documents/Bellevue University/HEALTH_STAT_29102023123216517.csv")
+head(df)
+```
+```{r}
+library(dplyr)
+```
+
+```{r}
+duplicates <- df |>
+  group_by_all() |>
+  filter(n() > 1) |>
+  ungroup()
+
+duplicate_counts <- df |>
+  add_count(VAR, Variable, UNIT, Measure, COU, Country, YEA, Year, Value, Flag.Codes, Flags) |>  
+  filter(n > 1) |>
+  distinct()
+
+duplicates
+```
+No duplicates found. Now lets look into the unique values of each column 
+
+```{r}
+unique(df$VAR)
+```
+
+
+```{r}
+unique(df$Variable)
+```
+```{r}
+unique(df$UNIT)
+```
+```{r}
+unique(df$Measure)
+```
+```{r}
+unique(df$COU)
+```
+```{r}
+unique(df$Country)
+```
+
+Note: Not all countries are listed here
+```{r}
+unique(df$YEA)
+```
+```{r}
+unique(df$Year)
+```
+These variables seem to present the same information. Lets double check:
+```{r}
+df %>% filter(Year != YEA)
+```
+There are no rows where the values in columns "Year" and "YEA" differ. Lets remove the YEA column after we finish reviewing the data. 
+
+```{r}
+unique(df$Flag.Codes)
+```
+```{r}
+unique(df$Flags)
+```
+Lets see how many rows there are that have a flag:
+```{r include=FALSE}
+df %>% filter(Flags != "")
+```
+There are 7,161 rows out of 322,564 rows that have a flag, or approximately 2.22%
+of the data set have flags. I plan to keep these as it may be useful for identifying patterns in the countries health status as we explore it overtime.
+
+Now that each column has been reviewed we can form the data set we will use for further analysis. We know that there are no duplicate rows and no strange "N/A" values hiding anywhere as we have viewed the distinct values in each column. We have noted in both columns Flag.Codes and Flags there are " " but can use those to explore patterns as we continue our analysis. Below is the cleaned dat set formed by using the original and removing the column "YEA" as it does not differ from the "Year" column.
+```{r}
+df_cleaned <- data.frame(df$VAR, df$Variable, df$UNIT, df$Measure, df$COU, df$Country, df$Year, df$Value, df$Flag.Codes, df$Flags)
+colnames(df_cleaned) <- c("VAR", "Variable", "UNIT", "Measure", "COU", "Country", "Year", "Value", "Flag.Codes", "Flags")
+```
+
+## What does the final data set look like?
+
+The final data set contains 322,564 observations over 10 different variables.
+The data set is organized by "VAR" first followed by "Variable". The "VAR" represents a code, which is readable on the original source but got exported differently. The variables are the focus within the "VAR" category. For example, EVIEFE00 is in the Life expectancy category with the variable "Females at Birth". I hope to find a way to change the codes or add a more descriptive column in if not able to change codes. 
+
+The data set is first broken down by "VAR", each data point is a code to the following categories: Life Expectancy, Causes of Mortality, Maternal and Infant Mortality, Premature mortality, Potential years of life lost, Avoidable mortality, Perceived health status, perceived health status by age and gender, perceived health status by socio-economic status, Infant health: low birth weight, communicable diseases, Cancer, Injuries, and Absence from work due to illness. Each variable falls into on of these categories and is then organized by country and year. Each country has a record associated with each year to give us a full timeline from 2010 to 2022.
+
+
+## Questions for future steps 
+
+How to change the data within the table? The codes listed under "VAR" differ from what is represented from the source. In the download CSV they are codes, on the website they are fully descriptive. For example VAR EVIEFE00 is variable "Life Expectancy" for Females at birth. All codes with "EVIE" full under the category Life Expectancy.  
+
+```{r}
+df_cleaned[df_cleaned == "EVIEFE00"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEFE40"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEFE60"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEFE65"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEHO00"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEHO40"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEHO60"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEHO65"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEHO80"] <- "Life Expectancy"
+#df_cleaned %>% filter(VAR == 'Life Expectancy')
+```
+
+My next step before further analysis is to rename all codes with readable codes.
+
+## What information is not sel-evident
+
+The countries within this dataset seem to be those associated to and involved with the OECD, this means the results produced through this analysis can only be applied in relation to countries within this dataset or those that have the same data tracked with the same measurements e.i. if there is another dataset outside of the OECD that tracks the same data then the two could be combined and/or compared for a more holistic analysis. 
+
+Another variable that I do not see here is world events, such as wars, pandemics, etc. There is a variable Flag which I believe to be related to the tracking of the data not related to global events taking place and what countries were effected. 
+
+Given the goal of this analysis I believe the global/significant event to be a reason as to why there is a drop in health status making it an explanatory variable for the analysis results. One way I can identify some global events is if there is a pattern across the majority of countries. 
+
+## What are different ways you could look at this data?
+
+This data set contains categories and variables within the categories. I am interested in creating models to predict an individuals health status and the country health status. I can do this by looking at the overall categories and using the averages and show them by country. I can also look at mortality/morbidity factors/variables and identify the highest rates by country. 
+
+## How do you plan to slice and dice the data?
+The data set currently has categories and variables within those categories, I would like to keep it this way for a generalized analysis however I would like to create a data set for each category. I am also considering creating a data set for each country to get the overall health status by country. My plan is to start with breaking it down into the categories and seeing how I can pull the data and if creating data sets for each country would allow easier access to the data.
+
+## How could you summarize your data to answer key questions?
+
+Taking the averages, max, and min would help get a general sense of the data and answer questions ranking variables. Then once the models are made producing the model summaries and accuracy can be used to answer the predictive questions.
+
+## What types of plots and tables will help you to illustrate the findings to your questions?
+
+Scatter plots for timeline analysis on the categories by country, histograms of the categories at a given year which can be used to mitigate population differences, confusion matrix to gain insight on the accuracy of models, and a summary of the models.
+
+## Do you plan on incorporating any machine learning techniques to answer your research questions? Explain.
+
+I do think machine learning techniques could help predict the future health status of countries and individuals. From my understanding machine learning takes in data is trained on the data and then uses it to produce predictions with a certain percentage of accuracy. I would like to do the same here in terms of predicting future health status based on past health status. I am unsure if it goes back far event to include any pattern of significant events impacting health status. 
+
+## Questions for future steps.
+
+How much data is needed to make a model with 80% or more accuracy in predicting health status?
+
+Is there a way to know the age of the individual who died based on cause? For example if someone died from Chronic liver diseases and cirrhosis at what age were they diagnosed and how long did they live? I believe this information would be useful and very interesting but may be trying isolate too much at this level. For further investigations I would love to add in an average life expectancy for each disease and to see how they differ by country.
+
+# Milestone 3 (YAY WE MADE IT!)
+
+```{r}
+df_cleaned[df_cleaned == "EVIEFE00"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEFE40"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEFE60"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEFE65"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEHO00"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEHO40"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEHO60"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEHO65"] <- "Life Expectancy"
+df_cleaned[df_cleaned == "EVIEHO80"] <- "Life Expectancy"
+#df_cleaned %>% filter(VAR == 'Life Expectancy')
+```
+
+```{r}
+df_life_exp = data.frame(data=df_cleaned %>% filter(VAR == 'Life Expectancy')) 
+head(df_life_exp)
+```
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+ggplot(df_life_exp, aes(x=data.Variable, y=data.Value)) + geom_point() + geom_smooth(method="lm") + labs(x="Gender/Age") + scale_y_continuous(name="Life Expectancy World Wide", labels = scales::comma) +  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+```
+
+```{r}
+df_life_exp_USA = data.frame(data=df_life_exp %>% filter(data.COU == 'USA')) 
+head(df_life_exp_USA)
+```
+```{r}
+ggplot(df_life_exp_USA, aes(x=data.data.Variable, y=data.data.Value)) + geom_point() + geom_smooth(method="lm") + labs(x="Gender/Age") + scale_y_continuous(name="Life Expectancy in USA", labels = scales::comma)  +  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+
+
+```
+```{r}
+df_death = data.frame(data=df_cleaned %>% filter(Variable == "All causes of death"))
+head(df_death)
+```
+
+```{r}
+ggplot(df_death, aes(x=data.COU, y=data.Value)) + geom_point() + geom_smooth(method="lm") + labs(x="Country") + scale_y_continuous(name="Death Count", labels = scales::comma)  +  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+```
+```{r}
+df_death_USA = data.frame(data=df_death %>% filter(data.COU == 'USA')) 
+head(df_death_USA)
+```
+
+
+# Intro
+This project came about do to the increase of illness in the United states. Outbreaks of new viruses such as COVID-19 will never be predictable but common diseases that have an established history do have some predictability. This projects goal is to explore the health status of the countries 
+
+# Problem Statement
+This project will investigate the health status of countries in attempts to identify an individuals likelihood of various health outcomes based on location, age, and gender. This study could be used to apply to statistics to an individual or a country at whole to help identify where more preventative care is needed.
+
+# Analysis
+When first analyzing the data the plan was to create subsets using the dplyr package to prep the data and create subsets of each country. After the separation a general data analysis is performed through a bar graph for each country. With the amount of variables under each country this bar graph would not be readable so the data will need to be grouped by the common factor. For example the data identifies at least 20 diseases. These disease can be grouped by the area they effect such as respiratory disease, heart disease, cancer, etc. This limits the level of data but will make the finding more readable. An analysis of the groupings could be done with the top contender. If cancer is the leading cause of mortality a subset of just cancer related deaths can be made and analyzed with the deeper level of specific types of cancer.
+
+Machine learning would be extremely beneficial here, being about to formulate a model of predictive outcomes is what this project is about so designing a model that takes in the data set, identifies patterns, and produces a likely outcome of a health status for a country would be ideal for this project. To do so the current data set would be used to train the neural network. I would first start to train the model to produce likely mortality causes. I would like to try and use one model to predict both the counties health status as well as an individuals health status however do to the complexity of humans (moving to other countries, family medical history, etc.) I think a separate model is appropriate.  
+
+# Implications
+When it comes to health status nothing is a 100% guarantee, this project looks at a health status of countries and identifies leading causes of mortality. This could be useful to research within the health field, support to funding preventive measure, and as a tool to educate individuals on health risks tailored to them.
+
+# Limitations
+A resource common amongst all research projects are time and man power. Using data to identify areas of improvement is fascinating but with the size of the dataset and how new I am to data science and analysis I found that I would need more time and a mentor to fully execute all the models with this dataset. 
+The biggest limitation I have found within the dataset is the size of the data and the codes/labels provided. From the source the dataset was retrieved the data was formatted very nicely in a GUI. The data when exported to a csv file still held everything shown from the original course, however, the labels of the variables became abbreviated codes, such as "EVIEFE00" which represents females life expectancy at birth. For the female life expectancy at 40yrs old the code is "EVIEFE40". There are many disease and mortality rates this dataset houses each with a different code. So the limitation I was faced with was a lack of knowledge, this was overcome by researching a solution, and then applying the solution. 
+
+Another useful variable would be data on family history, for example someone with a older family member who carry an inheritable disease are more likely to have said disease. Treatment history of family members may also be beneficial when looking on the micro end of this project. Having the treatment history of the family member could allow trying a different approach to treatment early on when the disease is in it`s early stages. However this would require handling sensitive information, multiple dataset, and more time to clean, explore, and analysis the data to produce findings.  
+
+
+# Concluding Remarks
+This dataset has a lot of good information in it! It has a breakdown of mortality which I`ll admit isn`t a fun thing to research, however by knowing what causes high mortality or a poor health status, that country can focus resources to develop preventative measures. By identifying the cause of the problem a solution can be formulated within our power, ethics, and morals. Or at the very least the population of the countries included in this project can be more informed and do with that information as they will. 
