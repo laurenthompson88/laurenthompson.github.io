@@ -1,5 +1,7 @@
 Project Title: Identifying Predictive Housing Price Variables
+
 Language: Python
+
 Libraries used:
 	pandas
 	numpy
