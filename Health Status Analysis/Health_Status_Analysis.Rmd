@@ -1,5 +1,5 @@
 ---
-title: "ThompsonDSC520SemesterProject"
+title: "Health Status Analysis"
 author: "Lauren M Thompson"
 date: "2023-11-18"
 output:
@@ -7,7 +7,7 @@ output:
   html_document: default
 ---
 
-#Milestone 1
+
 ## Introduction
 In the beginning of 2019 the United States begun to see the effects of COVID-19.
 As this virus spread across the globe health regulations and precautions where implemented for the safety of society. For many this was the first outbreak they have experienced bringing a new light to health safety. This project will investigate the health status of countries in attempts to identify an individuals likelihood of various health outcomes based on location, age, and gender. This study could be used to apply to statistics to an individual or a country at whole to help identify where more preventative care is needed.    
@@ -67,7 +67,7 @@ Are there models or concepts that might aid in analyzing this data set in the up
 
 What variables could be helpful in this investigation that are not currently provided in the dataset?
 
-# Milestone 2
+
 
 ## How to import and clean my data
 
@@ -213,7 +213,7 @@ How much data is needed to make a model with 80% or more accuracy in predicting 
 
 Is there a way to know the age of the individual who died based on cause? For example if someone died from Chronic liver diseases and cirrhosis at what age were they diagnosed and how long did they live? I believe this information would be useful and very interesting but may be trying isolate too much at this level. For further investigations I would love to add in an average life expectancy for each disease and to see how they differ by country.
 
-# Milestone 3 (YAY WE MADE IT!)
+
 
 ```{r}
 df_cleaned[df_cleaned == "EVIEFE00"] <- "Life Expectancy"
